@@ -10,6 +10,9 @@ right = Vector((1,0,0))
 front = Vector((0,1,0))
 
 ############## DRAW ###############
+
+# DRAW VIEW 3D ###########
+
 lineshader = gpu.shader.from_builtin('POLYLINE_UNIFORM_COLOR')
 
 now = None
@@ -112,7 +115,7 @@ def draw_speed_value():
         blf.color(font_id,0,1,1,1)  
         blf.draw(font_id, str(round(speed0.length,2))+" m/s")
 
-# DRAW GRAPH EDITOR #
+# DRAW GRAPH EDITOR ###########
     
 def draw_acceleration_graph():
     C = bpy.context
@@ -193,8 +196,6 @@ class MovementInspectorSettingItem(bpy.types.PropertyGroup):
 
     show_acceleration_graph: bpy.props.BoolProperty(name="Show acceleration", default = False)
     show_speed_graph: bpy.props.BoolProperty(name="Show speed", default = False)
-
-
 
 ############### PANELS ################
 
