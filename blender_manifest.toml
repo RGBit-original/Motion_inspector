@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "motion_inspector"
-version = "0.1.1"
+version = "0.1.2"
 name = "Motion inspector"
 tagline = "Inspect F-Curves and animated object movement"
 maintainer = "R.G.B.it aka Chalouek"
