@@ -347,9 +347,9 @@ def register():
     view3d_post_pixel_handler = view3d.draw_handler_add(view3d_pixel_draw, (), 'WINDOW', 'POST_PIXEL')
     graph_post_view_handler = graph.draw_handler_add(graph_draw, (), 'WINDOW','POST_VIEW')
 
-
 def unregister():
     bpy.utils.unregister_class(MovementInspectorSettingItem)
+    del bpy.types.WindowManager.movement_inspector_overlays
     bpy.utils.unregister_class(SetupFrameReferences)
     bpy.utils.unregister_class(ClearFrameReferences)
     bpy.utils.unregister_class(MotionViewPanel)
