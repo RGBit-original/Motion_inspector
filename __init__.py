@@ -375,19 +375,20 @@ class SetupFrameReferences(bpy.types.Operator):
     def execute(self,context):
         C = context        
         D = bpy.data
-        futurePostfix = C.object.name+'_future'
-        pastPostfix = C.object.name+'_past'
-        
-        f = D.objects.get(futurePostfix)
-        p = D.objects.get(pastPostfix)
-
-        if f: D.objects.remove(f)
-        if p: D.objects.remove(p)
-
         is_armature = C.object.type == 'ARMATURE'
-        activeObjAction =  C.active_object.animation_data.action    
 
         if is_armature:
+            futurePostfix = C.object.name+'_future'
+            pastPostfix = C.object.name+'_past'
+            
+            f = D.objects.get(futurePostfix)
+            p = D.objects.get(pastPostfix)
+
+            if f: D.objects.remove(f)
+            if p: D.objects.remove(p)
+            
+            activeObjAction =  C.active_object.animation_data.action    
+
             future = C.object.copy()
             future.name = futurePostfix
             past = C.object.copy()
@@ -406,28 +407,59 @@ class SetupFrameReferences(bpy.types.Operator):
                 #link to scene
                 C.scene.collection.objects.link(obj)
                 obj.hide_set(True)
+        
+        else: # if other objects
+            # first object
+            current = C.object
+            last_current = None
+            child_refs = [None,None]
 
-        else:
-            future = D.objects.new(futurePostfix,None)
-            past = D.objects.new(pastPostfix,None)
+            while current:
+                activeObjAction = current.animation_data.action 
 
-            for obj in [future,past]:
-                offset = -1 if obj.name == futurePostfix else +1
-                obj.animation_data_create()
-                #copy constraint
-                for constraint in C.object.constraints:
-                    obj.constraints.copy( constraint )
-                #link to scene
-                C.scene.collection.objects.link(obj)
-                obj.hide_set(True)
-                #offset animation
-                obj.animation_data.nla_tracks.new()
-                obj.animation_data.nla_tracks[0].strips.new(
-                    activeObjAction.name ,
-                    int(activeObjAction.frame_range[0])+offset ,
-                    activeObjAction 
-                )
+                futurePostfix = current.name+'_future'
+                pastPostfix = current.name+'_past'
+                f = D.objects.get(futurePostfix)
+                p = D.objects.get(pastPostfix)
+                if f: D.objects.remove(f)
+                if p: D.objects.remove(p)
 
+                #---- make copy
+                future = D.objects.new(futurePostfix,None)
+                past = D.objects.new(pastPostfix,None)
+
+                if child_refs[0] and child_refs[1]:
+                    child_refs[0].parent = past
+                    child_refs[1].parent = future
+                    #copy parent inverse matrix
+                    child_refs[0].matrix_parent_inverse = last_current.matrix_parent_inverse
+                    child_refs[1].matrix_parent_inverse = last_current.matrix_parent_inverse
+
+                for obj in [future,past]:
+                    offset = -1 if obj.name == futurePostfix else +1
+                    obj.animation_data_create()
+                  
+                    #copy constraint
+                    for constraint in C.object.constraints:
+                        obj.constraints.copy( constraint )
+                    #link to scene
+                    C.scene.collection.objects.link(obj)
+                    #obj.hide_set(True)
+
+                    #offset animation
+                    obj.animation_data.nla_tracks.new()
+                    obj.animation_data.nla_tracks[0].strips.new(
+                        activeObjAction.name ,
+                        int(activeObjAction.frame_range[0])+offset ,
+                        activeObjAction 
+                    )
+                #----
+
+                # select parent and childs
+                child_refs[0] = past
+                child_refs[1] = future
+                last_current = current
+                current = current.parent
 
         return {'FINISHED'}
     
